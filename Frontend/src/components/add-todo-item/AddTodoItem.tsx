@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Button, Col, Container, Form, Row, Stack } from 'react-bootstrap';
+import { RowLayout } from '../common/RowLayout';
+import { BaseTodoItem } from '../../types';
 
 export interface AddTodoItemProps {
-  onAdd?: (item: any) => void;
+  onAdd?: (item: BaseTodoItem) => void;
 }
 
 export const AddTodoItem: React.FC<AddTodoItemProps> = ({ onAdd }) => {
@@ -17,33 +19,35 @@ export const AddTodoItem: React.FC<AddTodoItemProps> = ({ onAdd }) => {
   const handleOnClear = () => setDescription('');
 
   return (
-    <Container>
-      <Form onSubmit={handleOnSubmit}>
-        <h1>Add Item</h1>
-        <Form.Group as={Row} className="mb-3" controlId="formAddTodoItem">
-          <Form.Label column sm="2">
-            Description
-          </Form.Label>
-          <Col md="6">
-            <Form.Control
-              type="text"
-              placeholder="Enter description..."
-              value={description}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDescription(event.target.value)}
-            />
-          </Col>
-        </Form.Group>
-        <Form.Group as={Row} className="mb-3 offset-md-2" controlId="formAddTodoItem">
-          <Stack direction="horizontal" gap={2}>
-            <Button variant="primary" type="submit">
-              Add Item
-            </Button>
-            <Button variant="secondary" onClick={handleOnClear}>
-              Clear
-            </Button>
-          </Stack>
-        </Form.Group>
-      </Form>
-    </Container>
+    <RowLayout>
+      <Container>
+        <Form onSubmit={handleOnSubmit}>
+          <h1>Add Item</h1>
+          <Form.Group as={Row} className="mb-3" controlId="formAddTodoItem">
+            <Form.Label column sm="2">
+              Description
+            </Form.Label>
+            <Col md="6">
+              <Form.Control
+                type="text"
+                placeholder="Enter description..."
+                value={description}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDescription(event.target.value)}
+              />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row} className="mb-3 offset-md-2" controlId="formAddTodoItem">
+            <Stack direction="horizontal" gap={2}>
+              <Button variant="primary" type="submit">
+                Add Item
+              </Button>
+              <Button variant="secondary" onClick={handleOnClear}>
+                Clear
+              </Button>
+            </Stack>
+          </Form.Group>
+        </Form>
+      </Container>
+    </RowLayout>
   );
 };
