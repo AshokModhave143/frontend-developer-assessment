@@ -51,7 +51,7 @@ export const ViewTodoItems: React.FC<ViewTodoItemsProps> = ({ onMarkComplete, on
                     Mark as completed
                   </Button>
                 )}
-                <Button variant="danger" size="sm" onClick={() => handleDeleteItem(item)}>
+                <Button variant="danger" size="sm" onClick={() => handleDeleteItem(item)} style={{ marginLeft: 5 }}>
                   Delete
                 </Button>
               </td>
