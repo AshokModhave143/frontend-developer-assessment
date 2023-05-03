@@ -5,7 +5,7 @@ import { RowLayout } from '../common/RowLayout';
 export const Header: React.FC = () => {
   return (
     <RowLayout>
-      <Image src="clearPointLogo.png" fluid rounded />
+      <Image src="clearPointLogo.png" alt="clearpoint.digital" fluid rounded />
     </RowLayout>
   );
 };

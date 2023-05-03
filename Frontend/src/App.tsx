@@ -10,7 +10,7 @@ import { deleteTodoItem, getTodoItems, postTodoItem, putTodoItem } from './servi
 import { BaseTodoItem, TodoItem } from './types';
 import { ToastComponent } from './components/common/ToastComponent';
 
-export const App = () => {
+export const App: React.FC = () => {
   const [items, setItems] = useState<TodoItem[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
 

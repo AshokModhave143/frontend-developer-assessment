@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { TodoItem } from '../types';
 
 const BASE_URL = 'http://localhost:8000';
 
