@@ -1,7 +1,6 @@
-/* eslint-disable testing-library/no-wait-for-multiple-assertions */
+import '@testing-library/jest-dom';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { App } from './App';
 import { getTodoItems, postTodoItem, putTodoItem, deleteTodoItem } from './services/TodoService';
 
@@ -23,6 +22,14 @@ const clearMocks = () => {
   mockedPutTodoItem.mockClear();
   mockedDeleteTodoItem.mockClear();
 };
+
+const renderComponent = async () => {
+  const view = render(<App />);
+  await waitFor(() => screen.findByText(/clearpoint.digital/i));
+
+  return view;
+};
+
 describe('Given App component', () => {
   beforeEach(() => {
     clearMocks();
@@ -33,54 +40,61 @@ describe('Given App component', () => {
       mockedGetTodoItems.mockResolvedValue(mockTodoItems);
     });
     test('Then renders without error', async () => {
-      render(<App />);
+      renderComponent();
+
       expect(screen.getByAltText('clearpoint.digital')).toBeInTheDocument();
     });
 
     test('Then should display the footer text', async () => {
-      render(<App />);
+      renderComponent();
+
       const footerElement = screen.getByText(/clearpoint.digital/i);
       expect(footerElement).toBeInTheDocument();
     });
 
     test('Then should display the todo app instructions', async () => {
-      render(<App />);
+      renderComponent();
+
       expect(screen.getByText(/Todo List App/i)).toBeInTheDocument();
       expect(screen.getByText(/Welcome to the ClearPoint frontend technical test./)).toBeInTheDocument();
     });
 
     test('Then should display add todo item form', async () => {
-      render(<App />);
+      renderComponent();
+
       expect(screen.getByPlaceholderText('Enter description...')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Add Item' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument();
     });
 
     test('Then should display todo item table', async () => {
-      render(<App />);
+      renderComponent();
+
       expect(screen.getByText(/Showing/)).toBeInTheDocument();
       expect(screen.getByRole('table')).toBeInTheDocument();
     });
 
     describe('And on mount', () => {
       test('Then should fetch and display the todo items', async () => {
-        render(<App />);
+        renderComponent();
 
         await waitFor(() => {
           expect(mockedGetTodoItems).toHaveBeenCalledTimes(1);
-          expect(screen.getByText(/Buy something/i)).toBeInTheDocument();
-          expect(screen.getByRole('button', { name: 'Mark as completed' })).toBeInTheDocument();
         });
+
+        expect(await screen.findByText(/Buy something/i)).toBeInTheDocument();
+        expect(await screen.findByRole('button', { name: 'Mark as completed' })).toBeInTheDocument();
       });
 
       test('Then should show console error if failed to fetch todo items', async () => {
         const mockError = new Error('Mock error');
-        mockedGetTodoItems.mockRejectedValueOnce(mockError);
+        mockedGetTodoItems.mockRejectedValue(mockError);
 
-        render(<App />);
+        renderComponent();
 
         expect(mockedGetTodoItems).toHaveBeenCalledTimes(1);
         expect(mockedGetTodoItems).toHaveBeenCalledWith();
+        mockedGetTodoItems.mockClear();
       });
     });
   });
@@ -91,14 +105,15 @@ describe('Given App component', () => {
 
     describe('And user enters valid description and click on "Add Item" button', () => {
       test('Then should add a new todo item', async () => {
-        mockedGetTodoItems.mockResolvedValue(mockTodoItems);
         const mockTodoItem = { description: 'Test description', isCompleted: false };
         mockedPostTodoItem.mockResolvedValue({ id: '3', ...mockTodoItem });
 
-        render(<App />);
+        renderComponent();
 
-        fireEvent.input(screen.getByPlaceholderText('Enter description...'), { value: 'Test description' });
-        fireEvent.click(screen.getByRole('button', { name: 'Add Item' }));
+        const inputElement = screen.getByPlaceholderText('Enter description...');
+        const addItemButton = screen.getByRole('button', { name: 'Add Item' });
+        fireEvent.change(inputElement, { target: { value: 'Test description' } });
+        fireEvent.click(addItemButton);
 
         await waitFor(() => {
           expect(mockedPostTodoItem).toHaveBeenCalledTimes(1);
@@ -107,41 +122,43 @@ describe('Given App component', () => {
     });
     describe('And user keep empty description and click on "Add Item" button', () => {
       test('Then should show toast with error', async () => {
-        mockedGetTodoItems.mockResolvedValue(mockTodoItems);
         const mockTodoItem = { description: '', isCompleted: false };
-        mockedPostTodoItem.mockResolvedValueOnce({ id: '3', ...mockTodoItem });
+        mockedPostTodoItem.mockResolvedValue({ id: '3', ...mockTodoItem });
 
-        render(<App />);
+        renderComponent();
 
-        fireEvent.change(screen.getByPlaceholderText('Enter description...'), {
-          target: { value: 'Test description' },
-        });
-        fireEvent.click(screen.getByRole('button', { name: 'Add Item' }));
+        const inputElement = screen.getByRole('textbox', { name: /Description/i });
+        const addItemButton = screen.getByRole('button', { name: /Add Item/i });
+        fireEvent.change(inputElement, { target: { value: '' } });
+        fireEvent.click(addItemButton);
 
         await waitFor(() => {
           expect(mockedPostTodoItem).toHaveBeenCalledTimes(1);
-          // expect(screen.getByText('Description is required')).toBeInTheDocument();
         });
       });
     });
   });
 
-  describe.skip('When marking todo item as completed', () => {
+  describe('When marking todo item as completed', () => {
     beforeEach(() => {
       mockedGetTodoItems.mockResolvedValue(mockTodoItems);
     });
 
     describe('And click on "Mark as completed" button in todo item list', () => {
       test('Then should change action button to "Completed" for todo item', async () => {
-        await render(<App />);
+        mockedPutTodoItem.mockResolvedValue({ ...mockTodoItems[0], isCompleted: true });
 
-        await fireEvent.click(screen.getByRole('button', { name: 'Mark as completed' }));
+        renderComponent();
+
+        const markAsCompletedButton = await screen.findByRole('button', { name: /Mark as completed/i });
+        fireEvent.click(markAsCompletedButton);
 
         await waitFor(() => {
           expect(mockedPutTodoItem).toHaveBeenCalledTimes(1);
-          expect(mockedPutTodoItem).toHaveBeenCalledWith({ ...mockTodoItems[0], isCompleted: true });
-          expect(screen.getByRole('button', { name: 'Completed' })).toBeInTheDocument();
         });
+
+        expect(mockedPutTodoItem).toHaveBeenCalledWith({ ...mockTodoItems[0], isCompleted: true });
+        expect(screen.getByRole('button', { name: 'Completed' })).toBeInTheDocument();
       });
     });
   });
