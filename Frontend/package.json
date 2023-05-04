@@ -21,7 +21,10 @@
   "overrides": {
     "make-fetch-happen": "11.0.0",
     "nth-check": "2.1.1",
-    "svgo": "2.x.x"
+    "svgo": "2.x.x",
+    "react-scripts": {
+      "typescript": "^5.0.4"
+    }
   },
   "scripts": {
     "start": "cross-env BROWSER=chrome react-scripts start",
